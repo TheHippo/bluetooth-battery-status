@@ -20,8 +20,7 @@ type device struct {
 }
 
 type deviceStatus struct {
-	macAddress    string
-	name          string
+	device
 	batteryStatus int
 	connected     bool
 }
@@ -61,8 +60,7 @@ func main() {
 
 func getDeviceStatus(d *device) *deviceStatus {
 	status := &deviceStatus{
-		name:       d.name,
-		macAddress: d.macAddress,
+		device: *d,
 	}
 	cmd := exec.Command("bluetoothctl", "info", d.macAddress)
 	var out bytes.Buffer
