@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"io"
 	"log"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 )
@@ -33,7 +35,9 @@ func init() {
 }
 
 func main() {
-	cmd := exec.Command("bluetoothctl", "devices")
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "bluetoothctl", "devices")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
@@ -62,7 +66,9 @@ func getDeviceStatus(d *device) *deviceStatus {
 	status := &deviceStatus{
 		device: *d,
 	}
-	cmd := exec.Command("bluetoothctl", "info", d.macAddress)
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "bluetoothctl", "info", d.macAddress)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
