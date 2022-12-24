@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -45,9 +46,15 @@ func main() {
 	}
 	devices := getDevices(&out)
 	status := make([]*deviceStatus, len(devices))
+	var wg sync.WaitGroup
 	for i, d := range devices {
-		status[i] = getDeviceStatus(d)
+		wg.Add(1)
+		go func(i int, d *device) {
+			defer wg.Done()
+			status[i] = getDeviceStatus(d)
+		}(i, d)
 	}
+	wg.Wait()
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{
